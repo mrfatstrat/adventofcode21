@@ -45,8 +45,19 @@ class Field:
             for r in range(line.start[0],line.stop[0]+1):
                 self.field[r][c] += 1
                 #print("Added +1 to: [%s,%s] now: %s" % (r,c, self.field[r][c]))
+        elif line.direction == LineDirection.DIAGONAL:
+            hStep = -1 if line.start[0] > line.stop[0] else 1
+            vStep = -1 if line.start[1] > line.stop[1] else 1
+            mark = line.start
+            while True:
+                self.field[mark[0]][mark[1]] += 1
+                if mark == line.stop:
+                    break
+                else:
+                    mark[0] += hStep
+                    mark[1] += vStep
         else:
-            print("Can't play with non horizontal or vertical lines, ignoring")
+            print("Weird line directions, ignoring")
 
     def countOverLaps(self, minimum):
         counter = 0
@@ -67,14 +78,11 @@ def main(argv):
         coordinates[0] = map(int,map(lambda x: x.strip(),coordinates[0]))
         coordinates[1] = map(int,map(lambda x: x.strip(),coordinates[1]))
         lines.append(Line(coordinates[0],coordinates[1]))
-
-    #find max horizontal and vertical
-    hvLines =  list(filter(lambda x: x.direction == LineDirection.HORIZONTAL or x.direction == LineDirection.VERTICAL ,lines))
-    print("Found %s horizontal or vertical lines" % len(hvLines))
-    hMax = max(map(lambda x: x.stop[0], hvLines)) + 1
-    vMax = max(map(lambda x: x.stop[1], hvLines)) + 1
+    print("Found %s lines" % len(lines))
+    hMax = max(map(lambda x: x.stop[0], lines)) + 1
+    vMax = max(map(lambda x: x.stop[1], lines)) + 1
     field = Field(hMax,vMax)
-    for hl in hvLines:
+    for hl in lines:
         field.addLine(hl)
     overlaps = field.countOverLaps(2)
     print("Overlaps with 2 lines or more: %s" % overlaps)
